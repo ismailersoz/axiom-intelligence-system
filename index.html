@@ -1,168 +1,1093 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Intelligence | Evidence Terminal</title>
-    <!-- Core Dependencies -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; background-color: #0F172A; }
-        /* Pro UI Elements */
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
-        .nav-sticky { position: sticky; top: 0; z-index: 999; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .forest-line { height: 2px; background: #334155; position: relative; width: 100%; }
-        .forest-diamond { width: 14px; height: 14px; background: #10B981; transform: rotate(45deg); position: absolute; top: -6px; margin-left: -7px; }
-        .confidence-interval { height: 2px; background: #10B981; position: absolute; top: 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Axiom Portal — Medical congress intelligence with AI-powered evidence synthesis">
+<title>Axiom Portal · Congress Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & ROOT ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #08090d;
+  --bg2:         #0f1117;
+  --bg3:         #161922;
+  --bg4:         #1c2030;
+  --border:      rgba(255,255,255,0.07);
+  --border2:     rgba(255,255,255,0.13);
+  --text:        #e8edf5;
+  --muted:       #7a8599;
+  --hint:        #4a5568;
+  --green:       #34d399;
+  --green-dim:   rgba(52,211,153,0.12);
+  --green-border:rgba(52,211,153,0.25);
+  --amber:       #fbbf24;
+  --amber-dim:   rgba(251,191,36,0.1);
+  --amber-border:rgba(251,191,36,0.25);
+  --red:         #f87171;
+  --red-dim:     rgba(248,113,113,0.1);
+  --red-border:  rgba(248,113,113,0.25);
+  --blue:        #60a5fa;
+  --blue-dim:    rgba(96,165,250,0.1);
+  --blue-border: rgba(96,165,250,0.25);
+  --accent:      #3b82f6;
+  --r:           10px;
+  --r-lg:        14px;
+}
+
+html { height: 100%; font-size: 15px; }
+
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── LAYOUT ───────────────────────────────────────────────────────────────── */
+#shell {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  grid-template-columns: 260px 1fr;
+  grid-template-areas: "nav nav" "sidebar main";
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── NAV ──────────────────────────────────────────────────────────────────── */
+#topnav {
+  grid-area: nav;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  flex: 1;
+}
+.nav-logo span {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid var(--green-border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+}
+.pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+
+.nav-disclaimer {
+  font-size: 10px;
+  color: var(--hint);
+  font-family: 'DM Mono', monospace;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────────────────────────────── */
+#sidebar {
+  grid-area: sidebar;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 20px 0;
+  background: var(--bg);
+}
+
+.sidebar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 20px 10px;
+}
+
+.congress-item {
+  padding: 14px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.congress-item:hover { background: var(--bg3); }
+.congress-item.active {
+  background: var(--bg3);
+  border-left-color: var(--accent);
+}
+
+.congress-item-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.congress-item-loc {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+.congress-item-count {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--hint);
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 20px;
+}
+
+/* ── MAIN ─────────────────────────────────────────────────────────────────── */
+#main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── SECTION LABEL ────────────────────────────────────────────────────────── */
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ── CONGRESS HEADER ──────────────────────────────────────────────────────── */
+.congress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.congress-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.congress-loc-main {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── TOPIC CARDS ──────────────────────────────────────────────────────────── */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+}
+
+.topic-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.topic-card:hover {
+  border-color: var(--border2);
+  background: var(--bg3);
+  transform: translateY(-1px);
+}
+
+.topic-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.topic-card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+}
+.topic-card-summary {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.topic-card-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.stat-chip strong { color: var(--text); font-weight: 500; }
+
+/* ── FLAG BADGES ──────────────────────────────────────────────────────────── */
+.flag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.flag-practice { background: var(--green-dim);  color: var(--green);  border: 1px solid var(--green-border); }
+.flag-emerging  { background: var(--blue-dim);   color: var(--blue);   border: 1px solid var(--blue-border);  }
+.flag-caution   { background: var(--amber-dim);  color: var(--amber);  border: 1px solid var(--amber-border); }
+.flag-lbt       { background: var(--red-dim);    color: var(--red);    border: 1px solid var(--red-border);   }
+
+/* ── ANALYTICS PANEL ──────────────────────────────────────────────────────── */
+#analytics {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+}
+#analytics.visible { display: flex; }
+
+.analytics-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.analytics-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--text);
+  line-height: 1.3;
+  flex: 1;
+}
+.back-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.back-btn:hover { background: var(--bg4); color: var(--text); }
+
+/* ── STAT CARDS ───────────────────────────────────────────────────────────── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+}
+.stat-card-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-family: 'DM Mono', monospace;
+}
+.stat-card-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-card-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hint);
+  margin-top: 4px;
+}
+
+/* ── FOREST PLOT ──────────────────────────────────────────────────────────── */
+.plot-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  overflow-x: auto;
+}
+.plot-card svg { display: block; overflow: visible; }
+
+/* ── AI PANEL ─────────────────────────────────────────────────────────────── */
+.ai-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+}
+.ai-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.ai-card-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#ai-body {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text);
+  min-height: 60px;
+}
+
+/* ── PULSE LOADER ─────────────────────────────────────────────────────────── */
+.pulse-loader {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.pulse-loader.active { display: flex; }
+.pulse-loader-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-load 1.4s ease-in-out infinite;
+}
+@keyframes pulse-load {
+  0%,100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+.pulse-loader-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── EVIDENCE TIER ────────────────────────────────────────────────────────── */
+.evidence-tier {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r);
+  margin-top: 14px;
+}
+.tier-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tier-note {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ── LIMITATIONS BOX ──────────────────────────────────────────────────────── */
+.limitations-box {
+  background: var(--amber-dim);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+/* ── TRIAL TABLE ──────────────────────────────────────────────────────────── */
+.trial-table-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+}
+.trial-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.trial-row:last-child { border-bottom: none; }
+.trial-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.pre-pub-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--hint);
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.trial-stats { text-align: right; }
+.trial-hr { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); }
+.trial-ci { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.trial-n  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--hint); }
+
+/* ── DISCLAIMER ───────────────────────────────────────────────────────────── */
+.disclaimer {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hint);
+  text-align: center;
+  line-height: 1.7;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── MOBILE ───────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  #shell {
+    grid-template-rows: 50px auto 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas: "nav" "sidebar" "main";
+    height: auto;
+    min-height: 100vh;
+  }
+  #sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    white-space: nowrap;
+  }
+  .congress-item { display: inline-block; border-left: none; border-bottom: 2px solid transparent; }
+  .congress-item.active { border-bottom-color: var(--accent); background: var(--bg3); }
+  .sidebar-label, .sidebar-divider { display: none; }
+  #main { padding: 16px; }
+  .topic-grid { grid-template-columns: 1fr; }
+  #topnav { padding: 0 16px; }
+  .nav-disclaimer { display: none; }
+}
+
+/* ── ANIMATIONS ───────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.fade-up { animation: fadeUp 0.3s ease both; }
+
+.topic-card { animation: fadeUp 0.25s ease both; }
+.topic-card:nth-child(2) { animation-delay: 0.05s; }
+.topic-card:nth-child(3) { animation-delay: 0.1s; }
+.topic-card:nth-child(4) { animation-delay: 0.15s; }
+</style>
 </head>
-<body class="text-slate-200 antialiased selection:bg-emerald-500/30">
+<body>
 
-    <div id="root"></div>
+<div id="shell">
 
-    <script type="text/babel">
-        const { useState } = React;
+  <!-- ── NAV ── -->
+  <nav id="topnav">
+    <div class="nav-logo">AXIOM PORTAL <span>v2.0</span></div>
+    <div class="nav-disclaimer">All data fictitious · Educational only</div>
+    <div class="status-pill"><div class="pulse-dot"></div>LIVE</div>
+  </nav>
 
-        const AxiomProApp = () => {
-            // State for the Terminal's internal view
-            const [terminalView, setTerminalView] = useState('LIST');
+  <!-- ── SIDEBAR ── -->
+  <aside id="sidebar">
+    <div class="sidebar-label">Congresses</div>
+    <div id="congress-list"></div>
+    <div class="sidebar-divider"></div>
+    <div style="padding:0 20px">
+      <div class="sidebar-label" style="padding:0 0 8px">Tracked</div>
+      <div id="congress-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></div>
+    </div>
+  </aside>
 
-            // Smooth scrolling logic
-            const scrollTo = (id) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            };
+  <!-- ── MAIN ── -->
+  <main id="main">
 
-            return (
-                <div className="min-h-screen flex flex-col">
-                    
-                    {/* --- PERSISTENT GLOBAL NAVIGATION --- */}
-                    <nav className="nav-sticky px-6 py-4 flex justify-between items-center transition-all">
-                        <div onClick={() => scrollTo('hero-section')} className="text-xl font-black tracking-tighter cursor-pointer hover:opacity-80 transition">
-                            AXIOM <span className="text-emerald-500">INTELLIGENCE</span>
-                        </div>
-                        <div className="flex gap-6 items-center">
-                            <button onClick={() => scrollTo('hero-section')} className="text-xs font-bold text-slate-400 hover:text-white transition uppercase tracking-wider">Overview</button>
-                            <button onClick={() => scrollTo('terminal-section')} className="bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/30 px-5 py-2.5 rounded-full hover:bg-emerald-500 hover:text-white transition uppercase tracking-wider">
-                                Access Terminal
-                            </button>
-                        </div>
-                    </nav>
+    <!-- Study feed -->
+    <div id="feed-view">
+      <div class="congress-header">
+        <div>
+          <div class="section-label">Streaming data</div>
+          <div class="congress-title" id="feed-title"></div>
+          <div class="congress-loc-main" id="feed-loc"></div>
+        </div>
+      </div>
+      <div class="topic-grid" id="topic-grid"></div>
+    </div>
 
-                    {/* --- HERO / LANDING SECTION --- */}
-                    <header id="hero-section" className="flex flex-col justify-center items-center text-center pt-32 pb-24 px-6 min-h-[80vh]">
-                        <div className="inline-block mb-6 px-3 py-1 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold tracking-widest uppercase text-slate-400">
-                            Institutional Pipeline <span className="text-emerald-500 ml-2">● Live</span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight max-w-4xl tracking-tight">
-                            Real-Time Evidence Synthesis <br/>
-                            <span className="text-slate-500">for Precision Medicine</span>
-                        </h1>
-                        <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl leading-relaxed">
-                            Axiom bridges the critical gap between Clinical Congress data releases and point-of-care decision making, delivering actionable intelligence in seconds.
-                        </p>
-                        <button onClick={() => scrollTo('terminal-section')} className="group relative bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-emerald-500 transition shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
-                            Launch 2026 Pipeline
-                            <span className="ml-2 group-hover:translate-x-1 inline-block transition-transform">→</span>
-                        </button>
-                    </header>
+    <!-- Analytics -->
+    <div id="analytics">
+      <div class="analytics-header">
+        <button class="back-btn" onclick="showFeed()">← Back to feed</button>
+        <div style="flex:1">
+          <div id="ana-flag" style="margin-bottom:8px"></div>
+          <div class="analytics-title" id="ana-title"></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="ana-summary"></div>
+        </div>
+      </div>
 
-                    {/* --- INTERACTIVE TERMINAL SECTION --- */}
-                    <section id="terminal-section" className="bg-[#0B1120] py-32 border-t border-slate-800/50 relative">
-                        {/* Background glow effect */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none"></div>
-                        
-                        <div className="max-w-4xl mx-auto px-6 relative z-10">
-                            <div className="mb-10 flex justify-between items-end">
-                                <div>
-                                    <h2 className="text-3xl font-bold text-white tracking-tight">2026 Congress Terminal</h2>
-                                    <p className="text-emerald-500 text-xs mt-2 uppercase tracking-[0.2em] font-bold">Secure Access Granted</p>
-                                </div>
-                            </div>
+      <!-- Stat row -->
+      <div class="stat-row" id="stat-row"></div>
 
-                            <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl min-h-[500px]">
-                                <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-700/50 flex justify-between items-center">
-                                    <div className="flex gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                                        <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                                        <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                                    </div>
-                                    <span className="text-[10px] font-mono text-slate-500">AXIOM_OS_V2.6</span>
-                                </div>
+      <!-- Forest plot -->
+      <div class="plot-card">
+        <div class="section-label">Forest plot</div>
+        <div id="forest-plot-wrap"></div>
+      </div>
 
-                                <div className="p-8 md:p-10">
-                                    {terminalView === 'LIST' ? (
-                                        <div className="space-y-4">
-                                            {/* Active Item */}
-                                            <div onClick={() => setTerminalView('DETAIL')} className="bg-slate-800/40 p-6 md:p-8 rounded-xl border border-slate-700 hover:border-emerald-500/50 cursor-pointer flex justify-between items-center transition group hover:bg-slate-800/60">
-                                                <div>
-                                                    <div className="text-emerald-500 text-[10px] font-bold mb-2 uppercase tracking-[0.2em]">ASCO 2026 • Practice Changing</div>
-                                                    <div className="text-white text-xl font-bold">Pancreatic Adenocarcinoma</div>
-                                                </div>
-                                                <div className="w-10 h-10 rounded-full bg-slate-900/50 flex items-center justify-center border border-slate-700 group-hover:border-emerald-500/50 transition">
-                                                    <span className="text-emerald-500 group-hover:translate-x-1 transition-transform">→</span>
-                                                </div>
-                                            </div>
-                                            {/* Locked Item */}
-                                            <div className="bg-slate-800/20 p-6 md:p-8 rounded-xl border border-slate-800/50 opacity-60 cursor-not-allowed flex justify-between items-center">
-                                                <div>
-                                                    <div className="text-slate-500 text-[10px] font-bold mb-2 uppercase tracking-[0.2em]">ESMO 2026 • Late Breaking</div>
-                                                    <div className="text-slate-400 text-xl font-bold font-mono">TNBC / ADC Combo</div>
-                                                </div>
-                                                <div className="text-xs font-mono text-slate-500 px-3 py-1 bg-slate-900 rounded border border-slate-800">DATA LOCKED</div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="animate-in fade-in zoom-in-95 duration-300">
-                                            {/* Pro Navigation inside Terminal */}
-                                            <button onClick={() => setTerminalView('LIST')} className="text-slate-400 hover:text-emerald-400 text-xs font-bold mb-8 flex items-center gap-2 transition group">
-                                                <span className="group-hover:-translate-x-1 transition-transform">←</span> Return to Pipeline
-                                            </button>
-                                            
-                                            <div className="bg-[#0B1120] p-8 md:p-10 rounded-2xl border border-slate-700/50 shadow-inner">
-                                                <h3 className="text-2xl font-bold text-white mb-10">Pancreatic Adenocarcinoma <span className="text-emerald-500 font-mono text-sm ml-2 bg-emerald-500/10 px-2 py-1 rounded">Synthesis Complete</span></h3>
-                                                
-                                                <div className="flex justify-between text-[10px] font-black text-slate-500 mb-8 uppercase tracking-[0.2em]">
-                                                    <span className="w-1/3">Favors Treatment</span>
-                                                    <span className="w-1/3 text-center">Null (1.0)</span>
-                                                    <span className="w-1/3 text-right">Favors Control</span>
-                                                </div>
-                                                
-                                                <div className="forest-line">
-                                                    <div className="absolute left-1/2 -top-4 bottom-[-40px] border-l border-dashed border-slate-600"></div>
-                                                    <div className="confidence-interval" style={{left: '20%', width: '15%'}}></div>
-                                                    <div className="forest-diamond" style={{left: '27%'}}></div>
-                                                </div>
-                                                
-                                                <div className="mt-16 flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-slate-900/50 rounded-lg border border-slate-800">
-                                                    <div className="mb-4 md:mb-0">
-                                                        <div className="text-white font-bold font-mono">RASolute 302 Phase III</div>
-                                                        <div className="text-slate-500 text-xs font-mono uppercase mt-1">n=1,240 • p &lt; 0.001</div>
-                                                    </div>
-                                                    <div className="text-left md:text-right">
-                                                        <div className="text-emerald-400 font-black text-3xl font-mono tracking-tighter">HR 0.40</div>
-                                                        <div className="text-slate-400 text-[10px] font-mono mt-1">95% CI [0.32 - 0.49]</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            );
-        };
+      <!-- AI synthesis -->
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="ai-card-label">LLM synthesis</div>
+          <div class="pulse-loader" id="pulse-loader">
+            <div class="pulse-loader-dot"></div>
+            <div class="pulse-loader-text">Synthesising evidence…</div>
+          </div>
+        </div>
+        <div id="ai-body"></div>
+        <div id="evidence-tier"></div>
+        <div id="limitations-box"></div>
+      </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<AxiomProApp />);
-    </script>
+      <!-- Trial table -->
+      <div class="trial-table-card">
+        <div class="section-label">Individual studies</div>
+        <div id="trial-table"></div>
+      </div>
+
+      <div class="disclaimer">
+        All congress data is fictitious · Educational demonstration only · Not for clinical decision-making<br>
+        HR = hazard ratio · CI = confidence interval · Results require independent verification
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG — paste your Anthropic API key here
+// ─────────────────────────────────────────────────────────────────────────────
+const ANTHROPIC_KEY = 'YOUR_API_KEY_HERE';
+
+const SYSTEM_PROMPT = `You are a specialist medical evidence synthesiser for a physician-facing congress intelligence platform.
+Respond in 3 to 4 sentences. Be precise and clinically credible.
+Distinguish pre-publication congress data from peer-reviewed publications.
+Note any important limitations or conflicts.
+End with a line: Evidence confidence: Strong, Emerging, Conflicting, or Limited.
+All data is fictitious for demonstration purposes.`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const FLAG_STYLES = {
+  practice: { bg:'var(--green-dim)',  text:'var(--green)',  border:'var(--green-border)',  label:'Practice-changing' },
+  emerging: { bg:'var(--blue-dim)',   text:'var(--blue)',   border:'var(--blue-border)',   label:'High interest'     },
+  caution:  { bg:'var(--amber-dim)',  text:'var(--amber)',  border:'var(--amber-border)',  label:'Needs interpretation'},
+  lbt:      { bg:'var(--red-dim)',    text:'var(--red)',    border:'var(--red-border)',    label:'Late-breaking'     },
+};
+
+const DATA = {
+  ASCO_2026: {
+    name: 'ASCO Annual Meeting 2026', loc: 'Chicago, IL · May 2026',
+    topics: [
+      {
+        id:'PAN', title:'Pancreatic Adenocarcinoma', flag:'practice',
+        summary:'RASolute 302 Phase III: first RAS-targeted combo to reach primary OS endpoint in PDAC.',
+        trials:[
+          { name:'Phase 1b (2024)',     hr:0.45, ci:[0.30,0.61], n:120,  pub:true  },
+          { name:'RASolute 302 (2026)', hr:0.40, ci:[0.32,0.49], n:810,  pub:false },
+        ],
+        pooled:{ hr:0.41, ci:[0.34,0.48] },
+        limitations:'Open-label arms; PDAC-specific histology only; eGFR <30 excluded.',
+        context:'Largest PDAC Phase III since FOLFIRINOX; advances on prior negative RAS-targeted trials.',
+      },
+      {
+        id:'NSCLC', title:'NSCLC Adjuvant TKI', flag:'emerging',
+        summary:'ELEVATE-A pooled analysis: third-gen TKI adjuvant therapy in resected EGFR+ NSCLC.',
+        trials:[
+          { name:'PILOT-9 (2025)',   hr:0.72, ci:[0.55,0.89], n:240,  pub:true  },
+          { name:'ELEVATE-A (2026)', hr:0.65, ci:[0.58,0.72], n:1180, pub:false },
+        ],
+        pooled:{ hr:0.68, ci:[0.61,0.75] },
+        limitations:'DFS endpoint only; OS data immature; crossover allowed at progression.',
+        context:'Consistent with LAURA trial DFS benefit; OS data awaited before practice change.',
+      },
+    ],
+  },
+  HFA_2026: {
+    name: 'Heart Failure Association 2026', loc: 'Barcelona, Spain · May 2026',
+    topics: [
+      {
+        id:'HFPEF', title:'HFpEF / Oral GLP-1', flag:'caution',
+        summary:'SOUL primary and HFpEF sub-analysis: oral semaglutide in T2DM + established HF.',
+        trials:[
+          { name:'PIONEER 6 (2019)', hr:0.79, ci:[0.57,1.11], n:3183, pub:true  },
+          { name:'SOUL (2026)',       hr:0.86, ci:[0.77,0.96], n:9650, pub:false },
+        ],
+        pooled:{ hr:0.84, ci:[0.76,0.94] },
+        limitations:'Sub-analysis of mixed HF phenotype; HFpEF stratum not pre-specified primary endpoint.',
+        context:'Complements STEP-HFpEF (SC semaglutide); raises question of oral vs injectable route.',
+      },
+    ],
+  },
+  EHA_2026: {
+    name: 'European Hematology (EHA) 2026', loc: 'Vienna, Austria · June 2026',
+    topics: [
+      {
+        id:'CART', title:'Multiple Myeloma CAR-T', flag:'emerging',
+        summary:'CARTITUDE-5 long-term follow-up: ciltacabtagene autoleucel vs standard of care.',
+        trials:[
+          { name:'LEGEND (2023)',       hr:0.31, ci:[0.20,0.45], n:97,  pub:true  },
+          { name:'CARTITUDE-5 (2026)', hr:0.24, ci:[0.18,0.32], n:419, pub:false },
+        ],
+        pooled:{ hr:0.26, ci:[0.20,0.32] },
+        limitations:'Manufacturing wait times not modelled; SPM signals under surveillance; EFS not PFS.',
+        context:'36-month follow-up confirms durable responses; moving conversation to earlier lines.',
+      },
+    ],
+  },
+  ESMO_2026: {
+    name: 'ESMO Congress 2026', loc: 'Berlin, Germany · Sept 2026',
+    topics: [
+      {
+        id:'TNBC', title:'TNBC / Novel ADC Combination', flag:'lbt',
+        summary:'DESTINY-Breast12 sub-analysis: T-DXd + durvalumab in PD-L1+ TNBC.',
+        trials:[
+          { name:'DB-09 (2024)', hr:0.58, ci:[0.44,0.72], n:522, pub:true  },
+          { name:'DB-12 (2026)', hr:0.49, ci:[0.40,0.58], n:984, pub:false },
+        ],
+        pooled:{ hr:0.52, ci:[0.45,0.59] },
+        limitations:'Pre-publication; ILD signals require careful patient selection; PD-L1 threshold varies by assay.',
+        context:'Signals additive benefit over T-DXd monotherapy; ILD risk requires multidisciplinary governance.',
+      },
+    ],
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let activeCongress = 'ASCO_2026';
+let activeTopic    = null;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────────────────────────────────
+function buildSidebar() {
+  const list = document.getElementById('congress-list');
+  const countEl = document.getElementById('congress-count');
+  let total = 0;
+  Object.entries(DATA).forEach(([key, c]) => {
+    total += c.topics.length;
+    const el = document.createElement('div');
+    el.className = 'congress-item' + (key === activeCongress ? ' active' : '');
+    el.dataset.key = key;
+    el.innerHTML = `
+      <div class="congress-item-name">${c.name}</div>
+      <div class="congress-item-loc">${c.loc}</div>
+      <div class="congress-item-count">${c.topics.length} topic${c.topics.length !== 1 ? 's':''}</div>`;
+    el.onclick = () => selectCongress(key);
+    list.appendChild(el);
+  });
+  countEl.textContent = `${Object.keys(DATA).length} congresses · ${total} topics`;
+}
+
+function selectCongress(key) {
+  activeCongress = key;
+  document.querySelectorAll('.congress-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.key === key);
+  });
+  showFeed();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEED VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+function showFeed() {
+  document.getElementById('feed-view').style.display = 'block';
+  document.getElementById('analytics').classList.remove('visible');
+
+  const c = DATA[activeCongress];
+  document.getElementById('feed-title').textContent = c.name;
+  document.getElementById('feed-loc').textContent   = c.loc;
+
+  const grid = document.getElementById('topic-grid');
+  grid.innerHTML = '';
+  c.topics.forEach(t => {
+    const fs = FLAG_STYLES[t.flag];
+    const reduction = Math.round((1 - t.pooled.hr) * 100);
+    const totalN = t.trials.reduce((s, tr) => s + tr.n, 0);
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.innerHTML = `
+      <div class="topic-card-top">
+        <div class="topic-card-title">${t.title}</div>
+        <div class="flag flag-${t.flag}">${fs.label}</div>
+      </div>
+      <div class="topic-card-summary">${t.summary}</div>
+      <div class="topic-card-stats">
+        <div class="stat-chip">HR <strong>${t.pooled.hr.toFixed(2)}</strong></div>
+        <div class="stat-chip">Reduction <strong>${reduction}%</strong></div>
+        <div class="stat-chip">N=<strong>${totalN.toLocaleString()}</strong></div>
+        <div class="stat-chip">Studies <strong>${t.trials.length}</strong></div>
+      </div>`;
+    card.onclick = () => showAnalytics(t);
+    grid.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANALYTICS VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+function showAnalytics(topic) {
+  activeTopic = topic;
+  document.getElementById('feed-view').style.display = 'none';
+  const ana = document.getElementById('analytics');
+  ana.classList.add('visible');
+
+  const fs = FLAG_STYLES[topic.flag];
+  const reduction = Math.round((1 - topic.pooled.hr) * 100);
+  const totalN = topic.trials.reduce((s, t) => s + t.n, 0);
+
+  // Header
+  document.getElementById('ana-flag').innerHTML =
+    `<div class="flag flag-${topic.flag}">${fs.label}</div>`;
+  document.getElementById('ana-title').textContent   = topic.title;
+  document.getElementById('ana-summary').textContent = topic.summary;
+
+  // Stat row
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-card-label">Pooled HR</div>
+      <div class="stat-card-value">${topic.pooled.hr.toFixed(2)}</div>
+      <div class="stat-card-sub">95% CI ${topic.pooled.ci[0].toFixed(2)}–${topic.pooled.ci[1].toFixed(2)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Risk reduction</div>
+      <div class="stat-card-value">${reduction}%</div>
+      <div class="stat-card-sub">vs control arm</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Studies pooled</div>
+      <div class="stat-card-value">${topic.trials.length}</div>
+      <div class="stat-card-sub">Total N=${totalN.toLocaleString()}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Data status</div>
+      <div class="stat-card-value" style="font-size:16px;margin-top:4px">${topic.trials.some(t=>!t.pub) ? '⚠ Pre-pub' : '✓ Published'}</div>
+      <div class="stat-card-sub">${topic.trials.filter(t=>t.pub).length} peer-reviewed</div>
+    </div>`;
+
+  // Forest plot
+  buildForestPlot(topic);
+
+  // Trial table
+  const table = document.getElementById('trial-table');
+  table.innerHTML = topic.trials.map(tr => `
+    <div class="trial-row">
+      <div>
+        <div class="trial-name">${tr.name}</div>
+        ${!tr.pub ? '<span class="pre-pub-tag">pre-publication</span>' : ''}
+      </div>
+      <div class="trial-stats">
+        <div class="trial-hr">HR ${tr.hr.toFixed(2)}</div>
+        <div class="trial-ci">[${tr.ci[0].toFixed(2)}, ${tr.ci[1].toFixed(2)}]</div>
+        <div class="trial-n">N=${tr.n.toLocaleString()}</div>
+      </div>
+    </div>`).join('');
+
+  // Evidence tier
+  buildEvidenceTier(topic);
+
+  // Limitations
+  const limBox = document.getElementById('limitations-box');
+  limBox.innerHTML = topic.limitations
+    ? `<div class="limitations-box">⚠ Limitations: ${topic.limitations}</div>` : '';
+
+  // LLM
+  document.getElementById('ai-body').textContent = '';
+  callLLM(topic);
+
+  ana.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FOREST PLOT — responsive, CI-accurate diamond
+// ─────────────────────────────────────────────────────────────────────────────
+function buildForestPlot(topic) {
+  const wrap    = document.getElementById('forest-plot-wrap');
+  const trials  = topic.trials;
+  const pooled  = topic.pooled;
+
+  const LABEL_W = 130;
+  const PAD_R   = 50;
+  const ROW_H   = 46;
+  const availW  = Math.min(wrap.clientWidth || 600, 800);
+  const PLOT_W  = Math.max(200, availW - LABEL_W - PAD_R);
+
+  const allLo = trials.map(t => t.ci[0]).concat([pooled.ci[0]]);
+  const allHi = trials.map(t => t.ci[1]).concat([pooled.ci[1]]);
+  const axMin = Math.max(0.05, Math.floor(Math.min(...allLo) * 10) / 10 - 0.1);
+  const axMax = Math.min(4.0,  Math.ceil( Math.max(...allHi) * 10) / 10 + 0.15);
+
+  function xPos(hr) { return ((hr - axMin) / (axMax - axMin)) * PLOT_W; }
+  const nullX = xPos(1.0);
+
+  const ticks = [];
+  for (let v = Math.ceil(axMin*10)/10; v <= axMax+0.001; v = Math.round((v+0.1)*10)/10) {
+    ticks.push(parseFloat(v.toFixed(2)));
+  }
+
+  const SVG_H   = ROW_H * (trials.length + 1) + 56;
+  const TOTAL_W = LABEL_W + PLOT_W + PAD_R;
+
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  const svg = el('svg', { width: TOTAL_W, height: SVG_H, viewBox: `0 0 ${TOTAL_W} ${SVG_H}` });
+
+  // Zone labels
+  svg.appendChild(el('text', { x: LABEL_W + nullX/2, y: 13, 'text-anchor':'middle', 'font-size':10, 'font-family':'DM Mono,monospace', fill:'var(--green)' }, '← favours treatment'));
+  svg.appendChild(el('text', { x: LABEL_W + (nullX+PLOT_W)/2, y: 13, 'text-anchor':'middle', 'font-size':10, 'font-family':'DM Mono,monospace', fill:'var(--red)' }, 'favours control →'));
+
+  // Null line
+  const nullLine = el('line', { x1: LABEL_W+nullX, y1: 18, x2: LABEL_W+nullX, y2: SVG_H-24, stroke:'var(--red)', 'stroke-width':0.75, 'stroke-dasharray':'3,3', opacity:0.5 });
+  svg.appendChild(nullLine);
+
+  // Trial rows
+  trials.forEach((tr, i) => {
+    const y   = 30 + i * ROW_H;
+    const cx  = LABEL_W + xPos(tr.hr);
+    const lo  = LABEL_W + xPos(tr.ci[0]);
+    const hi  = LABEL_W + xPos(tr.ci[1]);
+    const crossesNull = tr.ci[0] < 1 && tr.ci[1] > 1;
+    const col = crossesNull ? 'var(--hint)' : 'var(--text)';
+
+    const g = el('g', {});
+
+    // Name
+    g.appendChild(el('text', { x: LABEL_W-8, y: y+4, 'text-anchor':'end', 'font-size':11, 'font-family':'DM Sans,sans-serif', fill:'var(--muted)' }, tr.name));
+    if (!tr.pub) g.appendChild(el('text', { x: LABEL_W-8, y: y+15, 'text-anchor':'end', 'font-size':9, 'font-family':'DM Mono,monospace', fill:'var(--hint)' }, '[pre-pub]'));
+
+    // Whisker
+    g.appendChild(el('line', { x1:lo, y1:y, x2:hi, y2:y, stroke:col, 'stroke-width':1.5, opacity:0.7 }));
+    g.appendChild(el('line', { x1:lo, y1:y-5, x2:lo, y2:y+5, stroke:col, 'stroke-width':1.5 }));
+    g.appendChild(el('line', { x1:hi, y1:y-5, x2:hi, y2:y+5, stroke:col, 'stroke-width':1.5 }));
+
+    // Point estimate square
+    g.appendChild(el('rect', { x:cx-4, y:y-4, width:8, height:8, fill:col }));
+
+    // HR label
+    g.appendChild(el('text', { x:hi+8, y:y+4, 'font-size':10, 'font-family':'DM Mono,monospace', fill:'var(--muted)' }, tr.hr.toFixed(2)));
+
+    svg.appendChild(g);
+  });
+
+  // Divider
+  svg.appendChild(el('line', {
+    x1: LABEL_W, y1: 30 + trials.length*ROW_H - 8,
+    x2: LABEL_W + PLOT_W, y2: 30 + trials.length*ROW_H - 8,
+    stroke:'var(--border2)', 'stroke-width':0.5
+  }));
+
+  // Pooled diamond — CI-accurate width
+  const py  = 30 + trials.length * ROW_H + 16;
+  const pcx = LABEL_W + xPos(pooled.hr);
+  const plo = LABEL_W + xPos(pooled.ci[0]); // left tip = CI lower
+  const phi = LABEL_W + xPos(pooled.ci[1]); // right tip = CI upper
+  const dh  = 9;
+
+  svg.appendChild(el('text', { x:LABEL_W-8, y:py+4, 'text-anchor':'end', 'font-size':11, 'font-family':'DM Sans,sans-serif', 'font-weight':500, fill:'var(--green)' }, 'Pooled'));
+  svg.appendChild(el('polygon', {
+    points: `${plo},${py} ${pcx},${py-dh} ${phi},${py} ${pcx},${py+dh}`,
+    fill:'var(--green)', opacity:0.85
+  }));
+  svg.appendChild(el('text', { x:phi+8, y:py+4, 'font-size':10, 'font-family':'DM Mono,monospace', 'font-weight':500, fill:'var(--green)' }, pooled.hr.toFixed(2)));
+
+  // Axis
+  const axY = SVG_H - 22;
+  svg.appendChild(el('line', { x1:LABEL_W, y1:axY, x2:LABEL_W+PLOT_W, y2:axY, stroke:'var(--border2)', 'stroke-width':0.5 }));
+  ticks.forEach(v => {
+    const tx = LABEL_W + xPos(v);
+    svg.appendChild(el('line', { x1:tx, y1:axY, x2:tx, y2:axY+4, stroke:'var(--border2)', 'stroke-width':0.5 }));
+    svg.appendChild(el('text', { x:tx, y:axY+14, 'text-anchor':'middle', 'font-size':9, 'font-family':'DM Mono,monospace', fill:'var(--hint)' }, v.toFixed(1)));
+  });
+
+  wrap.innerHTML = '';
+  wrap.appendChild(svg);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVIDENCE TIER — derived honestly from data
+// ─────────────────────────────────────────────────────────────────────────────
+function buildEvidenceTier(topic) {
+  const allPub       = topic.trials.every(t => t.pub);
+  const ciCrossesNull = topic.pooled.ci[0] < 1.0 && topic.pooled.ci[1] > 1.0;
+  const anyPrePub    = topic.trials.some(t => !t.pub);
+  const multi        = topic.trials.length >= 2;
+
+  let tier, bg, border, col, note;
+  if (allPub && !ciCrossesNull && multi) {
+    tier='Strong';      bg='var(--green-dim)'; border='var(--green-border)'; col='var(--green)';
+    note='All studies published · CI excludes null · Replicated across trials';
+  } else if (anyPrePub && !ciCrossesNull) {
+    tier='Emerging';    bg='var(--blue-dim)';  border='var(--blue-border)';  col='var(--blue)';
+    note='Pre-publication data included · Signals consistent · Await peer review';
+  } else if (ciCrossesNull) {
+    tier='Conflicting'; bg='var(--amber-dim)'; border='var(--amber-border)'; col='var(--amber)';
+    note='Confidence interval crosses HR=1 · Evidence direction uncertain';
+  } else {
+    tier='Limited';     bg='var(--red-dim)';   border='var(--red-border)';   col='var(--red)';
+    note='Insufficient replication · Interpret with caution';
+  }
+
+  document.getElementById('evidence-tier').innerHTML = `
+    <div class="evidence-tier" style="background:${bg};border:1px solid ${border}">
+      <div class="tier-badge" style="background:${col};color:#fff">${tier}</div>
+      <div class="tier-note" style="color:${col}">${note}</div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LLM
+// ─────────────────────────────────────────────────────────────────────────────
+async function callLLM(topic) {
+  const aiBody    = document.getElementById('ai-body');
+  const loader    = document.getElementById('pulse-loader');
+
+  aiBody.textContent = '';
+  loader.classList.add('active');
+
+  const trialSummary = topic.trials
+    .map(t => `${t.name}: HR ${t.hr} (95% CI ${t.ci[0]}–${t.ci[1]}, N=${t.n}, ${t.pub ? 'published' : 'pre-publication'})`)
+    .join('; ');
+  const reduction = Math.round((1 - topic.pooled.hr) * 100);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 350,
+        system: SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: `Synthesise congress data for ${topic.title}:\nTrials: ${trialSummary}\nPooled HR: ${topic.pooled.hr} (95% CI ${topic.pooled.ci[0]}–${topic.pooled.ci[1]})\nRisk reduction: ${reduction}% vs control\nContext: ${topic.context}\nLimitations: ${topic.limitations}`,
+        }],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+    aiBody.textContent = text;
+
+  } catch(e) {
+    aiBody.innerHTML = `<span style="color:var(--red)">${e.message || 'Network error — synthesis unavailable.'}</span>`;
+  } finally {
+    loader.classList.remove('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+buildSidebar();
+showFeed();
+
+// Rebuild forest plot on resize
+window.addEventListener('resize', () => {
+  if (activeTopic) buildForestPlot(activeTopic);
+});
+</script>
 </body>
 </html>
