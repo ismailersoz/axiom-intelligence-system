@@ -10,14 +10,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; background-color: #0F172A; }
         .forest-line { height: 2px; background: #334155; position: relative; width: 100%; }
         .forest-diamond { width: 12px; height: 12px; background: #10B981; transform: rotate(45deg); position: absolute; top: -5px; margin-left: -6px; }
         .confidence-interval { height: 2px; background: #10B981; position: absolute; top: 0; }
         .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="bg-[#0F172A] text-slate-200">
+<body class="text-slate-200">
 
     <div id="root"></div>
 
@@ -26,92 +26,75 @@
 
         const AxiomApp = () => {
             const [screen, setScreen] = useState('LIST');
-            const [selectedTopic, setSelectedTopic] = useState(null);
 
             const portalData = {
-                ASCO_2026: { name: "ASCO 2026", topics: [{ id: 1, title: "Pancreatic Adenocarcinoma", hr: 0.40, ci: [0.32, 0.49], summary: "RASolute 302 Phase III results." }] },
-                ESMO_2026: { name: "ESMO 2026", topics: [{ id: 2, title: "TNBC / Novel ADC", hr: 0.52, ci: [0.45, 0.59], summary: "DESTINY-Breast12 Sub-analysis." }] }
+                ASCO_2026: { name: "ASCO 2026", topics: [{ id: 1, title: "Pancreatic Adenocarcinoma", hr: 0.40, ci: [0.32, 0.49] }] },
+                ESMO_2026: { name: "ESMO 2026", topics: [{ id: 2, title: "TNBC / Novel ADC", hr: 0.52, ci: [0.45, 0.59] }] }
             };
 
+            const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
             const scrollToDemo = () => document.getElementById('demo-terminal').scrollIntoView({ behavior: 'smooth' });
 
             return (
                 <div className="min-h-screen">
-                    {/* --- LANDING PAGE SECTION --- */}
-                    <nav className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-                        <div className="text-xl font-black tracking-tighter">AXIOM <span className="text-emerald-500">INTELLIGENCE</span></div>
-                        <button onClick={scrollToDemo} className="text-xs font-bold border border-emerald-500/50 px-4 py-2 rounded-full text-emerald-500 hover:bg-emerald-500 hover:text-white transition">Launch Terminal</button>
+                    {/* --- LANDING PAGE --- */}
+                    <nav id="top" className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto sticky top-0 z-50 bg-[#0F172A]/80 backdrop-blur-md">
+                        <div onClick={scrollToTop} className="text-xl font-black tracking-tighter cursor-pointer">
+                            AXIOM <span className="text-emerald-500">INTELLIGENCE</span>
+                        </div>
+                        <button onClick={scrollToDemo} className="text-xs font-bold border border-emerald-500/50 px-4 py-2 rounded-full text-emerald-500 hover:bg-emerald-500 hover:text-white transition">Live Terminal</button>
                     </nav>
 
                     <header className="max-w-4xl mx-auto text-center py-24 px-6">
                         <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-8">Real-Time Evidence Synthesis for Precision Medicine</h1>
-                        <p className="text-xl text-slate-400 mb-10 leading-relaxed">Axiom bridges the gap between Clinical Congress data and Point-of-Care decision making.</p>
+                        <p className="text-xl text-slate-400 mb-10 leading-relaxed">Closing the gap between Congress data and clinical decision-making.</p>
                         <div className="flex flex-col md:flex-row justify-center gap-4">
-                            <button onClick={scrollToDemo} className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-emerald-500 transition shadow-lg shadow-emerald-900/20">View 2026 Pipeline</button>
-                            <button className="bg-slate-800 text-white px-8 py-4 rounded-lg font-bold text-lg border border-slate-700">Read Whitepaper</button>
+                            <button onClick={scrollToDemo} className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-emerald-500 transition">View 2026 Pipeline</button>
                         </div>
                     </header>
 
-                    <section className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-8 mb-24 text-center">
-                        <div><div className="text-3xl font-bold text-white">4.2M+</div><div className="text-xs text-slate-500 uppercase mt-1 tracking-widest">Data Points</div></div>
-                        <div><div className="text-3xl font-bold text-white">98.4%</div><div className="text-xs text-slate-500 uppercase mt-1 tracking-widest">Accuracy</div></div>
-                        <div><div className="text-3xl font-bold text-emerald-500 animate-pulse">● LIVE</div><div className="text-xs text-slate-500 uppercase mt-1 tracking-widest">ASCO/ESMO Feed</div></div>
-                    </section>
-
-                    {/* --- EMBEDDED TERMINAL SECTION --- */}
-                    <section id="demo-terminal" className="bg-slate-900/50 py-24 border-t border-slate-800">
-                        <div className="max-w-4xl mx-auto px-6">
-                            <div className="text-center mb-12">
-                                <span className="text-emerald-500 text-xs font-bold tracking-[0.3em] uppercase">Interactive Prototype</span>
-                                <h2 className="text-3xl font-bold text-white mt-2">2026 Pipeline Terminal</h2>
+                    {/* --- THE TERMINAL (Unified) --- */}
+                    <section id="demo-terminal" className="bg-slate-900/50 py-24 border-t border-slate-800 px-6">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="flex justify-between items-end mb-12">
+                                <div>
+                                    <span className="text-emerald-500 text-xs font-bold tracking-[0.3em] uppercase">Interactive Terminal</span>
+                                    <h2 className="text-3xl font-bold text-white mt-2">2026 Pipeline</h2>
+                                </div>
+                                <button onClick={scrollToTop} className="text-slate-500 hover:text-white text-xs font-bold mb-1">↑ EXIT TO LANDING PAGE</button>
                             </div>
 
-                            <div className="glass-card rounded-2xl overflow-hidden shadow-2xl min-h-[450px]">
-                                <div className="bg-slate-800/50 px-6 py-3 border-b border-slate-700 flex justify-between items-center">
-                                    <div className="flex gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-slate-700"></div>
-                                        <div className="w-3 h-3 rounded-full bg-slate-700"></div>
-                                    </div>
-                                    <span className="text-[10px] font-mono text-slate-500">AXIOM_CORE_V2.6</span>
-                                </div>
-
+                            <div className="glass-card rounded-2xl overflow-hidden shadow-2xl">
                                 <div className="p-8">
                                     {screen === 'LIST' ? (
                                         <div className="space-y-4">
                                             {Object.entries(portalData).map(([key, val]) => (
-                                                <div key={key} onClick={() => setScreen('DETAIL')} className="group bg-slate-800/40 p-6 rounded-xl border border-slate-700 hover:border-emerald-500/50 cursor-pointer transition">
-                                                    <div className="flex justify-between items-center">
-                                                        <div>
-                                                            <div className="text-emerald-500 text-[10px] font-bold mb-1 uppercase tracking-widest">{val.name}</div>
-                                                            <div className="text-white font-bold">{val.topics[0].title}</div>
-                                                        </div>
-                                                        <div className="text-slate-500 group-hover:text-emerald-500 transition">→</div>
+                                                <div key={key} onClick={() => setScreen('DETAIL')} className="bg-slate-800/40 p-6 rounded-xl border border-slate-700 hover:border-emerald-500/50 cursor-pointer flex justify-between items-center transition">
+                                                    <div>
+                                                        <div className="text-emerald-500 text-[10px] font-bold mb-1 uppercase tracking-widest">{val.name}</div>
+                                                        <div className="text-white font-bold">{val.topics[0].title}</div>
                                                     </div>
+                                                    <span className="text-emerald-500">→</span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                            <button onClick={() => setScreen('LIST')} className="text-emerald-500 text-xs font-bold mb-6">← BACK TO PIPELINE</button>
+                                        <div className="animate-in fade-in duration-500">
+                                            <button onClick={() => setScreen('LIST')} className="text-emerald-500 text-xs font-bold mb-6 hover:underline">← BACK TO PIPELINE LIST</button>
                                             <h3 className="text-xl font-bold text-white mb-8">Pancreatic Adenocarcinoma</h3>
-                                            
-                                            <div className="bg-slate-900/80 p-8 rounded-xl border border-slate-800 mb-6">
+                                            <div className="bg-slate-900/80 p-8 rounded-xl border border-slate-800">
                                                 <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-8 uppercase tracking-widest">
-                                                    <span>Superior</span><span>Null (1.0)</span><span>Inferior</span>
+                                                    <span>Superior</span><span>Null</span><span>Inferior</span>
                                                 </div>
                                                 <div className="forest-line">
                                                     <div className="absolute left-1/2 -top-2 bottom-0 border-l border-dashed border-slate-700"></div>
                                                     <div className="confidence-interval" style={{left: '16%', width: '10%'}}></div>
                                                     <div className="forest-diamond" style={{left: '21%'}}></div>
                                                 </div>
-                                                <div className="mt-8 flex justify-between items-center">
-                                                    <span className="text-xs font-mono text-slate-400">RASolute 302 Phase III</span>
-                                                    <span className="text-emerald-500 font-bold font-mono text-lg">HR 0.40</span>
+                                                <div className="mt-8 flex justify-between items-center font-mono">
+                                                    <span className="text-xs text-slate-400">RASolute 302 Phase III</span>
+                                                    <span className="text-emerald-500 font-bold text-lg">HR 0.40</span>
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="bg-black/40 p-4 rounded-lg border border-emerald-500/20 font-mono text-xs leading-relaxed text-emerald-400/80">
-                                                {"> "} AI Synthesis: Pooled data confirms statistically measurable superiority. Clinical adoption recommended for 2026 guidelines.
                                             </div>
                                         </div>
                                     )}
@@ -119,10 +102,6 @@
                             </div>
                         </div>
                     </section>
-
-                    <footer className="py-12 text-center text-slate-600 text-[10px] uppercase tracking-widest border-t border-slate-900">
-                        © 2026 Axiom Intelligence Systems • Institutional Stage Pipeline
-                    </footer>
                 </div>
             );
         };
