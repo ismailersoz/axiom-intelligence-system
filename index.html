@@ -3,26 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Intelligence | Terminal</title>
-    <!-- Scripts to run React in a single file -->
+    <title>Axiom Intelligence | Evidence Terminal</title>
+    <!-- React & Tailwind CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #0F172A; }
+        body { font-family: 'Inter', sans-serif; background-color: #0F172A; color: #E2E8F0; margin: 0; }
+        .animate-pulse-fast { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // PASTE THE ENTIRE "AxiomPortal" REACT CODE HERE
         const { useState, useEffect } = React;
 
         const AxiomPortal = () => {
-            // ... (The code we just refined goes here) ...
+            const [screen, setScreen] = useState('CONGRESS_LIST');
+            const [selectedCongress, setSelectedCongress] = useState(null);
+            const [selectedTopic, setSelectedTopic] = useState(null);
+            const [isLlmLoading, setIsLlmLoading] = useState(false);
+            const [llmSummary, setLlmSummary] = useState("");
+
+            const getPos = (val) => Math.min(Math.max((val / 2) * 100, 0), 100);
+
+            const portalData = {
+                ASCO_2026: {
+                    name: "ASCO Annual Meeting 2026",
+                    location: "Chicago, IL • May 2026",
+                    topics: [
+                        { 
+                            id: "PAN_CANCER", 
+                            title: "Pancreatic Adenocarcinoma", 
+                            congressFlag: "Practice-Changing",
+                            summary: "RASolute 302 Phase III Results",
+                            hr: 0.40,
+                            trials: [
+                                { name: "Phase 1b (2024)", hr: 0.45, ci: [0.30, 0.61] },
+                                { name: "RASolute 302 (2026)", hr: 0.40, ci: [0.32, 0.49] }
+                            ],
+                            pooled: { hr: 0.41, ci: [0.34, 0.48] }
+                        }
+                    ]
+                },
+                HFA_2026: {
+                    name: "Heart Failure Assoc. 2026",
+                    location: "Barcelona • May 2026",
+                    topics: [
+                        { 
+                            id: "HFPEF", 
+                            title: "HFpEF / Oral GLP-1", 
+                            congressFlag: "Non-Inferiority Pool",
+                            summary: "SOUL Primary & Sub-Analysis",
+                            hr: 0.84,
+                            trials: [
+                                { name: "PIONEER 6 (2019)", hr: 0.79, ci: [0.57, 1.11] },
+                                { name: "SOUL (2026)", hr: 0.86, ci: [0.77, 0.96] }
+                            ],
+                            pooled: { hr: 0.84, ci: [0.76, 0.94] }
+                        }
+                    ]
+                },
+                ESMO_2026: {
+                    name: "ESMO Congress 2026",
+                    location: "Berlin, Germany • Sept 2026",
+                    topics: [
+                        { 
+                            id: "TNBC_ADC", 
+                            title: "TNBC / Novel ADC Combination", 
+                            congressFlag: "Late-Breaking Abstract",
+                            summary: "DESTINY-Breast12 Sub-analysis",
+                            hr: 0.52,
+                            trials: [
+                                { name: "DB-09 (2024)", hr: 0.58, ci: [0.44, 0.72] },
+                                { name: "DB-12 (2026)", hr: 0.49, ci: [0.40, 0.58] }
+                            ],
+                            pooled: { hr: 0.52, ci: [0.45, 0.59] }
+                        }
+                    ]
+                }
+            };
+
+            const handleSelectTopic = (topic) => {
+                setSelectedTopic(topic);
+                setScreen('ANALYTICS');
+                setIsLlmLoading(true);
+                
+                setTimeout(() => {
+                    const text = `Synthesis Complete. Pooled HR ${topic.pooled.hr} for ${topic.title} confirms a statistically superior efficacy profile. Axiom recommends high-priority review.`;
+                    setLlmSummary(text);
+                    setIsLlmLoading(false);
+                    const speech = new SpeechSynthesisUtterance(text);
+                    window.speechSynthesis.speak(speech);
+                }, 1500);
+            };
+
+            return (
+                <div className="min-h-screen">
+                    <nav className="h-16 bg-[#1E293B] flex items-center justify-between px-6 border-b border-slate-800 sticky top-0 z-50">
+                        <div className="flex items-center gap-4">
+                            {screen !== 'CONGRESS_LIST' && 
+                                <button onClick={() => setScreen(screen === 'ANALYTICS' ? 'STUDY_FEED' : 'CONGRESS_LIST')} className="text-white text-xl">←</button>
+                            }
+                            <div className="font-black tracking-tighter text-sm uppercase">Axiom <span className="text-emerald-500">Intelligence</span></div>
+                        </div>
+                        <div className="text-[9px] font-bold border border-emerald-500 text-emerald-500 px-2 py-1 rounded">V2.6 LIVE</div>
+                    </nav>
+
+                    <div className="max-w-md mx-auto p-6">
+                        {screen === 'CONGRESS_LIST' && (
+                            <>
+                                <div className="text-[10px] font-bold text-slate-500 mb-6 tracking-widest uppercase">Global Pipeline</div>
+                                {Object.keys(portalData).map(key => (
+                                    <div key={key} onClick={() => { setSelectedCongress(key); setScreen('STUDY_FEED'); }} 
+                                         className="bg-slate-800 p-5 rounded-xl mb-3 border border-slate-700 cursor-pointer flex justify-between items-center">
+                                        <div>
+                                            <div className="font-bold text-white text-sm">{portalData[key].name}</div>
+                                            <div className="text-xs text-slate-400 mt-1">{portalData[key].location}</div>
+                                        </div>
+                                        <div className="text-[10px] font-black text-rose-500 flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></div> LIVE
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+
+                        {screen === 'STUDY_FEED' && (
+                            <>
+                                <div className="text-[10px] font-bold text-emerald-500 mb-6 tracking-widest uppercase">Streaming: {portalData[selectedCongress].name}</div>
+                                {portalData[selectedCongress].topics.map(t => (
+                                    <div key={t.id} onClick={() => handleSelectTopic(t)}
+                                         className="bg-slate-800 p-5 rounded-xl mb-3 border-l-4 border-emerald-500 cursor-pointer">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="font-bold text-sm text-white">{t.title}</div>
+                                            <div className="text-[9px] font-black text-emerald-500 uppercase">{t.congressFlag}</div>
+                                        </div>
+                                        <div className="text-xs text-slate-400 mb-4">{t.summary}</div>
+                                        <div className="flex gap-2">
+                                            <span className="bg-slate-900 px-2 py-1 rounded text-[10px] font-bold">HR {t.hr}</span>
+                                            <span className="bg-slate-900 px-2 py-1 rounded text-[10px] font-bold">AI-EXTRACTED</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+
+                        {screen === 'ANALYTICS' && (
+                            <div className="animate-in fade-in duration-500">
+                                <h2 className="text-xl font-black text-white mb-6">{selectedTopic.title}</h2>
+                                
+                                <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 mb-6">
+                                    <div className="flex justify-between text-[8px] font-black text-slate-500 mb-4 tracking-tighter">
+                                        <span>FAVORS TREATMENT</span>
+                                        <span>NULL</span>
+                                        <span>FAVORS CONTROL</span>
+                                    </div>
+                                    <div className="relative h-40 border-l border-slate-700">
+                                        <div className="absolute left-1/2 top-0 bottom-0 border-l border-dashed border-rose-500/50"></div>
+                                        
+                                        {selectedTopic.trials.map((trial, i) => (
+                                            <div key={i} className="flex items-center h-10 relative">
+                                                <div className="w-20 text-[9px] font-bold text-slate-500 truncate">{trial.name}</div>
+                                                <div className="flex-1 relative h-full flex items-center">
+                                                    <div className="absolute h-0.5 bg-slate-600" style={{left: `${getPos(trial.ci[0])}%`, width: `${getPos(trial.ci[1]) - getPos(trial.ci[0])}%`}}></div>
+                                                    <div className="absolute w-2 h-2 bg-white rounded-sm -ml-1" style={{left: `${getPos(trial.hr)}%`}}></div>
+                                                </div>
+                                                <div className="text-[10px] font-mono font-bold w-8 text-right">{trial.hr}</div>
+                                            </div>
+                                        ))}
+
+                                        <div className="border-t border-slate-700 my-4"></div>
+
+                                        <div className="flex items-center h-10 relative">
+                                            <div className="w-20 text-[10px] font-black text-emerald-500">POOLED</div>
+                                            <div className="flex-1 relative h-full flex items-center">
+                                                <div className="absolute h-1 bg-emerald-500/30" style={{left: `${getPos(selectedTopic.pooled.ci[0])}%`, width: `${getPos(selectedTopic.pooled.ci[1]) - getPos(selectedTopic.pooled.ci[0])}%`}}></div>
+                                                <div className="absolute w-3 h-3 bg-emerald-500 rotate-45 -ml-1.5" style={{left: `${getPos(selectedTopic.pooled.hr)}%`}}></div>
+                                            </div>
+                                            <div className="text-[12px] font-black text-emerald-500 w-8 text-right">{selectedTopic.pooled.hr}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-black border border-emerald-500/30 p-6 rounded-2xl shadow-2xl shadow-emerald-500/10">
+                                    <div className="text-[10px] font-black text-emerald-500 mb-3 tracking-widest uppercase">Axiom Extraction Engine</div>
+                                    <div className="font-mono text-sm leading-relaxed text-slate-300">
+                                        {isLlmLoading ? <span className="animate-pulse-fast text-emerald-500">_Scanning grounded clinical dataset...</span> : llmSummary}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
